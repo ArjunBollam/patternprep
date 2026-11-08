@@ -1,5 +1,7 @@
 # PatternPrep: interview prep kits
 
+**Live site: https://arjunbollam.github.io/patternprep/**
+
 A static study site with a home page and 8 kits (215 lessons):
 
 | Kit | Lessons |
@@ -17,11 +19,14 @@ All content is original study material.
 
 ## Open it
 
-Double-click `index.html`, or run:
+Use the live site above, or double-click `index.html`. To run it on a local web server instead:
 
 ```bash
-open pattern-study-site/index.html
+cd pattern-study-site
+python3 -m http.server 8080
 ```
+
+Then open http://localhost:8080.
 
 You don't need a build step or a server. Links look like `index.html#/system-design-interview/design-a-rate-limiter`,
 so the back and forward buttons, refresh and bookmarks work. "Mark as complete" progress is saved in your browser
