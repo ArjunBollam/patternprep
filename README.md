@@ -2,18 +2,18 @@
 
 **Live site: https://arjunbollam.github.io/patternprep/**
 
-A static study site with a home page and 8 kits (215 lessons):
+A static study site with a home page and 8 kits (246 lessons):
 
 | Kit | Lessons |
 | --- | --- |
-| How to Write a Good Resume | 7 |
-| Coding Interview Patterns | 118 (19 patterns, Python / JavaScript / Java solutions) |
+| How to Write a Good Resume | 17 |
+| Coding Interview Patterns | 120 (19 patterns, 101 problems; every problem shows each approach from brute force to optimal, with Python / JavaScript / Java code and a test-case table) |
 | System Design Interview | 30 |
-| Behavioral Interview | 16 |
-| Object-Oriented Design Interview | 12 (Java + Python) |
+| Behavioral Interview | 23 |
+| Object-Oriented Design Interview | 16 (Java + Python) |
 | Machine Learning System Design Interview | 11 |
-| Mobile System Design Interview | 9 (Kotlin / Swift snippets) |
-| Generative AI System Design Interview | 12 |
+| Mobile System Design Interview | 15 (Kotlin / Swift snippets) |
+| Generative AI System Design Interview | 14 |
 
 All content is original study material.
 

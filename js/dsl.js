@@ -49,6 +49,23 @@ window.K = (function () {
       if (!sec) throw new Error('lessons: no section ' + sectionId);
       sec.lessons.push(...list);
     },
+    /** Put the lessons of a coding-patterns section in the given id order. */
+    order(sectionId, ids) {
+      const sec = byId['coding-interview-patterns'].sections.find(s => s.id === sectionId);
+      if (!sec) throw new Error('order: no section ' + sectionId);
+      const have = sec.lessons.map(l => l.id);
+      const missing = ids.filter(id => !have.includes(id)).concat(have.filter(id => !ids.includes(id)));
+      if (missing.length) throw new Error('order: ' + sectionId + ' mismatch: ' + missing.join(', '));
+      sec.lessons.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+    },
+    /** Put the chapters of a chapter-style kit in the given id order. */
+    orderChapters(courseId, ids) {
+      const arr = byId[courseId].chapters;
+      const have = arr.map(c => c.id);
+      const missing = ids.filter(id => !have.includes(id)).concat(have.filter(id => !ids.includes(id)));
+      if (missing.length) throw new Error('orderChapters: ' + courseId + ' mismatch: ' + missing.join(', '));
+      arr.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+    },
     /** Add numbered chapters to a chapter-style kit. */
     chapters(courseId, list, opts) {
       const arr = byId[courseId].chapters;
@@ -97,6 +114,25 @@ window.K = (function () {
     code: codeBlock,
     impl: (a, b, c) => [{ type: 'h2', text: 'Implementation' }, codeBlock(a, b, c)],
     cx: (time, space) => [{ type: 'h2', text: 'Complexity Analysis' }, { type: 'cx', time, space }],
+    /** Section heading for one of several approaches: ap(1, 'Brute force') → "Approach 1: Brute force". */
+    ap: (n, name) => ({ type: 'h2', text: 'Approach ' + n + ': ' + name }),
+    /** Time/space summary for an approach that is not the final one. */
+    cost: (time, space, extra) => ({ type: 'cx', time, space, extra }),
+    /** Side-by-side summary of every approach: vs([['Brute force', '$O(n^3)$', '$O(1)$', 'note'], ...]) */
+    vs: rows => [{ type: 'h2', text: 'Comparing the Approaches' },
+      { type: 'table', head: ['Approach', 'Time', 'Space', 'When to use it'], rows }],
+    /**
+     * Test-case table: tests([[input, expected, what it checks], ...], opts).
+     * Inputs are Python-style keyword arguments ("nums = [1, 2], target = 3"); the checker
+     * (scratchpad check.js) calls the Python and JavaScript solutions with them.
+     * opts: fn (name or list of names), conv {arg: 'list'|'tree'}, out ('list'|'tree'|'sort'|'sort2'|'approx'),
+     *       inplace (arg name), ops (class name: inputs are call sequences), check / jscheck (custom compare).
+     */
+    tests: (rows, opts) => [{ type: 'h2', text: 'Test Cases' },
+      { type: 'p', text: 'Run these inputs against your code before you call it done. Together they cover the edge cases interviewers like to probe.' },
+      { type: 'tests', rows, opts: opts || {} }],
+    /** Interview tips / follow-up questions. */
+    tips: (...items) => [{ type: 'h2', text: 'Interview Tips' }, { type: 'ul', items }],
 
     rg: (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i),
   };

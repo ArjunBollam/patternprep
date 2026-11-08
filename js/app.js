@@ -14,7 +14,7 @@
 
   function math(src) {
     const sups = [];
-    src = src.replace(/\\([a-zA-Z]+)/g, '$1'); // allow TeX-style \log
+    src = src.replace(/\\text\{([^}]*)\}/g, '$1').replace(/\\([a-zA-Z]+)/g, '$1'); // allow TeX-style \text{...} and \log
     let s = src.replace(/\^\{([^}]*)\}|\^([\w.]+)/g, (m, a, b) => { sups.push(a || b); return '\u0001' + (sups.length - 1) + '\u0002'; });
     s = esc(s).replace(/(^|[^\w&;])([a-zA-Z])(?![\w])/g, '$1<i>$2</i>');
     return s.replace(/\u0001(\d+)\u0002/g, (m, i) => '<sup>' + esc(sups[i]).replace(/\b([a-zA-Z])\b/g, '<i>$1</i>') + '</sup>');
@@ -349,7 +349,11 @@
       case 'state': return '<div class="dg"><div class="state">' + fmt(b.state || b.text) + '</div></div>';
       case 'row': return '<div class="dgline">' + b.items.map(renderBlock).join('') + '</div>';
       case 'code': return renderCode(b);
-      case 'cx': return '<ul class="cx"><li><strong>Time complexity:</strong> ' + fmt(b.time) + '</li><li><strong>Space complexity:</strong> ' + fmt(b.space) + '</li></ul>';
+      case 'cx': return '<ul class="cx"><li><strong>Time complexity:</strong> ' + fmt(b.time) + '</li><li><strong>Space complexity:</strong> ' + fmt(b.space) + '</li>' +
+        (b.extra ? '<li>' + fmt(b.extra) + '</li>' : '') + '</ul>';
+      case 'tests': return '<div class="tblwrap"><table class="tbl tests"><thead><tr><th>Input</th><th>Expected output</th><th>What it checks</th></tr></thead><tbody>' +
+        b.rows.map(r => '<tr><td><code class="chip">' + esc(r[0]) + '</code></td><td><code class="chip">' + esc(r[1]) + '</code></td><td>' + fmt(r[2]) + '</td></tr>').join('') +
+        '</tbody></table></div>';
       default: throw new Error('Unknown block type: ' + b.type);
     }
   }

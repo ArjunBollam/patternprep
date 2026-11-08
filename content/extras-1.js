@@ -84,6 +84,15 @@
       p("Design a general-purpose AI assistant that holds multi-turn conversations, answers questions, writes and explains code, and follows instructions safely. The core is a large language model; the system around it handles training, serving and safety."),
       h('Clarifying Requirements'),
       ul("Text-only chat in many languages; multi-turn context.", "Millions of daily users; responses start streaming within ~1 second.", "Must refuse harmful requests and avoid making up facts where possible."),
+      h('Frame the Problem'),
+      p("Model the assistant as **next-token prediction** conditioned on the conversation so far: the input is a system prompt plus the alternating user and assistant turns, and the output is the next assistant message, generated one token at a time. A decoder-only transformer is the standard choice; its quality depends mostly on the data and on post-training."),
+      h('Data'),
+      table(['Stage', 'Data', 'Size and quality'], [
+        ['Pretraining', 'web pages, books, code, papers, multilingual text', 'trillions of tokens; deduplicated, filtered for quality, toxicity and personal data'],
+        ['Supervised fine-tuning', 'prompt and ideal-response conversations', 'tens to hundreds of thousands, written or reviewed by experts'],
+        ['Preference data', 'pairs of responses ranked by people or reward models', 'hundreds of thousands of comparisons, covering helpfulness and safety'],
+        ['Safety data', 'red-team prompts with desired refusals and safe completions', 'continuously expanded as new attacks appear'],
+      ]),
       h('Training pipeline'),
       flow({ nodes: { pt: [0, 0, 'Pretraining\nweb text, code, books', 'ml'], sft: [1.3, 0, 'Supervised\nfine-tuning', 'ml'], pref: [2.6, 0, 'Preference tuning\n(RLHF / DPO)', 'ml'], ev: [3.9, 0, 'Evaluation\n& red teaming'] },
         edges: [['pt', 'sft', 'base model'], ['sft', 'pref', 'instruction model'], ['pref', 'ev']], ux: 165, bw: 140 }),
@@ -101,6 +110,17 @@
       ),
       h('Evaluation'),
       ul("Benchmarks for knowledge, reasoning and coding; human preference comparisons between model versions.", "Safety evals: refusal of harmful requests without over-refusing benign ones.", "Online: thumbs up/down, conversation length, regenerations."),
+      h('Overall System'),
+      flow({ nodes: { app: [0, 0.6, 'Chat client', 'client'], gw: [1.2, 0.6, 'API gateway\nauth, rate limits'], inSafe: [2.4, 0, 'Input safety\nclassifier', 'ml'], orch: [2.4, 1.2, 'Orchestrator\nprompt builder'], store: [3.6, 1.9, 'Conversation\nstore', 'db'], llm: [3.6, 0.6, 'LLM servers\nbatched GPUs', 'ml'], outSafe: [4.8, 0.6, 'Output safety\nfilter', 'ml'] },
+        edges: [['app', 'gw', 'message'], ['gw', 'inSafe'], ['inSafe', 'orch'], ['orch', 'store', 'history', 'both'], ['orch', 'llm', 'prompt'], ['llm', 'outSafe', 'tokens'], ['outSafe', 'app', 'stream', 'dash']], ux: 150, bw: 128 }),
+      h('Other Talking Points'),
+      ul(
+        "**Long conversations**: summarise older turns or retrieve the relevant ones, so prompts fit the context window and costs stay bounded.",
+        "**Hallucinations**: retrieval of trusted sources, citations, and training the model to say *I'm not sure*.",
+        "**Cost**: route simple requests to a smaller model; cache common system prompts (prefix caching).",
+        "**Tools**: let the model call search, a calculator or code execution for tasks where text prediction alone is unreliable.",
+        "**Privacy**: opt-outs from training, retention limits and personal-data filters on stored conversations."
+      ),
     ],
   }], { after: 'introduction-and-overview' });
 
@@ -114,12 +134,28 @@
         ul("100+ languages; text up to a few thousand characters; automatic source-language detection.", "Latency under a second for short texts; quality comparable to professional translation for common pairs."),
         h('Frame the Problem'),
         p("**Sequence-to-sequence generation**: an encoder reads the source sentence; a decoder generates the target sentence token by token, attending to the encoder output. A single **multilingual** model, told the target language with a special token, shares knowledge across languages and helps low-resource pairs."),
+        h('Model'),
+        flow({ nodes: { src: [0, 0, 'Source text\n+ target-language tag', 'client'], tok: [1.2, 0, 'Shared subword\ntokenizer', 'ml'], enc: [2.4, 0, 'Encoder\n(bidirectional)', 'ml'], dec: [3.6, 0, 'Decoder\n(autoregressive)', 'ml'], out: [4.8, 0, 'Translated text', 'client'] },
+          edges: [['src', 'tok'], ['tok', 'enc'], ['enc', 'dec', 'cross-attention'], ['dec', 'out']], ux: 150, bw: 128 }),
+        ul(
+          "The **encoder** reads the whole source sentence in both directions; the **decoder** generates the translation one token at a time while attending to the encoder's output.",
+          "A **target-language token** at the start tells one multilingual model which language to produce, so a single model serves every pair.",
+          "Large general-purpose LLMs can also translate when prompted; a dedicated encoder-decoder model is usually cheaper and faster for high-volume traffic."
+        ),
         h('Data'),
         ul("Parallel corpora (sentence pairs), filtered for alignment quality.", "**Back-translation**: translate monolingual target-language text into the source language with an existing model to create extra synthetic pairs.", "A shared subword tokenizer across all languages."),
         h('Evaluation'),
         ul("Automatic: BLEU / chrF and learned metrics (e.g. COMET-style) against reference translations.", "Human evaluation of adequacy and fluency for key language pairs.", "Online: user edits and \"suggest an edit\" feedback."),
         h('Serving'),
         ul("Language detection → segment text into sentences → batch translate → reassemble with formatting preserved.", "Beam search for quality; cache frequent sentences.", "Smaller distilled models for on-device offline translation."),
+        h('Other Talking Points'),
+        ul(
+          "**Formality and gender**: many languages mark formality or grammatical gender that English omits. Offer formal/informal options and show alternatives when gender is ambiguous.",
+          "**Terminology**: let businesses supply glossaries that force consistent translations of product names and terms.",
+          "**Documents and formats**: preserve HTML tags, placeholders and numbers by masking them before translation.",
+          "**Low-resource languages**: transfer from related languages in the multilingual model, back-translation, and targeted data collection.",
+          "**Safety**: avoid introducing offensive words that weren't in the source; detect and handle such cases."
+        ),
       ],
     },
     {
@@ -127,6 +163,13 @@
       title: 'Image Captioning',
       body: [
         p("Generate a short, accurate description of an image, e.g. for accessibility alt text or for search indexing."),
+        h('Clarifying Requirements'),
+        ul(
+          "Captions of one or two sentences, in English first and other languages later.",
+          "Used for alt text on a social platform: millions of uploads per day, captions ready within a few seconds of upload.",
+          "Accuracy matters more than creativity: never describe objects that aren't there.",
+          "Never identify real people or guess sensitive attributes."
+        ),
         h('Frame the Problem'),
         p("A **vision encoder** turns the image into a sequence of feature vectors; a **text decoder** (a language model) generates the caption while attending to those features. Modern systems connect a pretrained image encoder to a pretrained LLM with a small trainable adapter."),
         flow({ nodes: { img: [0, 0, 'Image', 'client'], enc: [1.2, 0, 'Vision encoder', 'ml'], ad: [2.4, 0, 'Adapter', 'ml'], llm: [3.6, 0, 'Language model\ndecoder', 'ml'], cap: [4.8, 0, '"A dog catching\na frisbee"', 'note'] },
@@ -135,6 +178,13 @@
         ul("Large image-text datasets (filtered for quality and safety), then fine-tuning on human-written captions.", "Train with next-token prediction on captions conditioned on the image."),
         h('Evaluation'),
         ul("Automatic: CIDEr, BLEU, and image-text similarity (CLIP score).", "Human ratings for accuracy (no hallucinated objects) and usefulness.", "For accessibility: screen-reader user feedback."),
+        h('Serving'),
+        ul(
+          "Caption asynchronously after upload: an upload event goes on a queue, GPU workers batch images, and the caption is stored with the post.",
+          "Resize images to the encoder's input size before inference; cache image features if captions are regenerated in other languages.",
+          "Use a smaller distilled model for real-time cases (camera apps), and a larger one offline.",
+          "Run a safety classifier on the caption and fall back to a generic description when confidence is low."
+        ),
         h('Other Talking Points'),
         ul("Hallucinated objects: penalise with grounding checks or object detectors.", "Sensitive content and people: avoid guessing identities or sensitive attributes.", "Latency: small encoders and cached image features."),
       ],
@@ -144,15 +194,30 @@
       title: 'Text-to-Video Generation',
       body: [
         p("Generate short video clips (a few seconds) from a text prompt. Video adds the **time** dimension: frames must be individually realistic and temporally consistent."),
+        h('Clarifying Requirements'),
+        ul(
+          "Clips of 4-10 seconds at 720p, 24 frames per second; optional image-to-video (animate a still image).",
+          "Generation can take a minute or more; users get a notification when the video is ready.",
+          "Strict safety: no realistic depictions of real people, no violent or explicit content, provenance labels on every output."
+        ),
         h('Frame the Problem'),
         p("Extend latent diffusion to video: compress the video into a spatio-temporal **latent** with a video autoencoder, then train a **diffusion transformer** that denoises sequences of latent patches conditioned on the text prompt."),
         ul("**Spatio-temporal patches**: treat the latent video as a sequence of 3-D patches so a transformer can attend across space and time.", "**Cascades**: generate a low-resolution, low-frame-rate video first, then upsample spatially and temporally with separate models."),
+        flow({ nodes: { prompt: [0, 0, 'Prompt', 'client'], te: [1.2, 0, 'Text encoder', 'ml'], noise: [1.2, 1.2, 'Noise\n(latent video)', 'note'], dit: [2.5, 0.6, 'Diffusion transformer\nspace-time patches', 'ml'], vdec: [3.8, 0.6, 'Video decoder', 'ml'], sr: [5, 0.6, 'Spatial + temporal\nupsampling', 'ml'] },
+          edges: [['prompt', 'te'], ['te', 'dit', 'condition'], ['noise', 'dit'], ['dit', 'vdec', 'clean latent'], ['vdec', 'sr']], ux: 145, bw: 132 }),
         h('Data'),
         ul("Large video-text datasets; re-caption videos with a captioning model for detailed descriptions.", "Filter for quality, motion, watermarks and unsafe content; respect licensing.", "Train jointly on images (as single-frame videos) to improve visual quality."),
         h('Evaluation'),
         ul("FVD (Fréchet Video Distance) for realism; CLIP-based text alignment.", "Human ratings for motion quality, consistency and prompt adherence."),
         h('Serving'),
         ul("Very expensive inference: queue requests, show progress, and return results asynchronously.", "Distillation to fewer denoising steps; lower default resolution with optional upscaling.", "Strong prompt and output safety filters; provenance watermarking."),
+        h('Other Talking Points'),
+        ul(
+          "**Temporal consistency**: objects flicker or morph between frames. Attention across time, training on longer clips and temporal upsampling models reduce it.",
+          "**Physics and motion**: evaluate specifically for plausible motion; it's where video models fail most visibly.",
+          "**Cost**: a single clip can cost as much GPU time as hundreds of images. Use previews at low resolution, quotas and off-peak batch processing.",
+          "**Long videos**: generate in segments that overlap and condition each segment on the end of the previous one."
+        ),
       ],
     },
   ], { after: 'personalized-headshot-generation' });

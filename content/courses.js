@@ -73,21 +73,21 @@
 
   const kits = [
     { id: 'resume', title: 'How to Write a Good Resume', short: 'Resume', art: art.resume,
-      blurb: 'Structure, impact-first bullet points, tailoring and the mistakes that get resumes skipped.' },
+      blurb: 'From the hiring pipeline to ready-made templates: impact-first bullets, tailoring, before-and-after rewrites and common mistakes.' },
     { id: 'coding-interview-patterns', title: 'Coding Interview Patterns', short: 'Coding Patterns', art: art.coding, layout: 'sections',
-      blurb: '19 patterns and 99 classic problems with pointer diagrams and Python, JavaScript and Java solutions.' },
+      blurb: '19 patterns and 101 classic problems, each solved from brute force to optimal, with diagrams, test cases and Python, JavaScript and Java code.' },
     { id: 'system-design-interview', title: 'System Design Interview', short: 'System Design', art: art.systemDesign,
       blurb: 'A repeatable framework plus end-to-end designs: rate limiters, key-value stores, feeds, chat, video and more.' },
     { id: 'behavioral-interview', title: 'Behavioral Interview', short: 'Behavioral', art: art.behavioral, badge: 'New',
-      blurb: 'The STAR method, building a story bank, level expectations and how to answer the most common questions.' },
+      blurb: 'What companies look for at each level, the STAR method, a story bank, every core competency and how to nail the interview day.' },
     { id: 'object-oriented-design-interview', title: 'Object-Oriented Design Interview', short: 'OOD', art: art.ood,
-      blurb: 'SOLID, key design patterns and complete class designs for parking lots, elevators, vending machines and more.' },
+      blurb: 'A step-by-step framework, SOLID and design patterns, plus complete Java and Python designs for 12 classic systems.' },
     { id: 'machine-learning-system-design-interview', title: 'Machine Learning System Design Interview', short: 'ML System Design', art: art.ml,
       blurb: 'A 7-step framework and full designs for search, recommendation, ranking and content-moderation systems.' },
     { id: 'mobile-system-design-interview', title: 'Mobile System Design Interview', short: 'Mobile System Design', art: art.mobile,
-      blurb: 'Client architecture, networking, offline sync and complete designs for feeds, chat, photos, live location and video apps.' },
+      blurb: 'A framework, building blocks and full client designs: feeds, chat, trading, pagination, hotel booking, file sync, video and more.' },
     { id: 'generative-ai-system-design-interview', title: 'Generative AI System Design Interview', short: 'GenAI System Design', art: art.genai,
-      blurb: 'LLM fundamentals, RAG, agents, evaluation and safety, with designs for chatbots, code assistants and image generation.' },
+      blurb: 'LLM fundamentals, RAG, agents and safety, with designs for chatbots, translation, captioning, faces, high-resolution images and video.' },
   ];
   kits.forEach(k => K.course(k));
 })();
