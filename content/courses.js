@@ -75,7 +75,7 @@
     { id: 'resume', title: 'How to Write a Good Resume', short: 'Resume', art: art.resume,
       blurb: 'Structure, impact-first bullet points, tailoring and the mistakes that get resumes skipped.' },
     { id: 'coding-interview-patterns', title: 'Coding Interview Patterns', short: 'Coding Patterns', art: art.coding, layout: 'sections',
-      blurb: '19 patterns and 86 classic problems with pointer diagrams and Python, JavaScript and Java solutions.' },
+      blurb: '19 patterns and 99 classic problems with pointer diagrams and Python, JavaScript and Java solutions.' },
     { id: 'system-design-interview', title: 'System Design Interview', short: 'System Design', art: art.systemDesign,
       blurb: 'A repeatable framework plus end-to-end designs: rate limiters, key-value stores, feeds, chat, video and more.' },
     { id: 'behavioral-interview', title: 'Behavioral Interview', short: 'Behavioral', art: art.behavioral, badge: 'New',

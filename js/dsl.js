@@ -3,7 +3,7 @@
  *
  *   K.course({ id, title, layout: 'sections' | 'chapters', ... })   (content/courses.js)
  *   K.section({ id, title, lessons: [...] })      → adds a section to the coding-patterns kit
- *   K.chapters('course-id', [{ id, title, body }]) → adds numbered chapters to a kit
+ *   K.chapters('course-id', [{ id, title, body }], { after: 'chapter-id' }?) → adds numbered chapters to a kit
  *
  * Lessons are made of "blocks" (plain objects); app.js turns them into HTML.
  * Inline text formatting (inside any text string):
@@ -43,8 +43,21 @@ window.K = (function () {
     },
     /** Add a section (with lessons) to the coding-patterns kit. */
     section(s) { byId['coding-interview-patterns'].sections.push(s); },
+    /** Append lessons to an existing coding-patterns section. */
+    lessons(sectionId, list) {
+      const sec = byId['coding-interview-patterns'].sections.find(s => s.id === sectionId);
+      if (!sec) throw new Error('lessons: no section ' + sectionId);
+      sec.lessons.push(...list);
+    },
     /** Add numbered chapters to a chapter-style kit. */
-    chapters(courseId, list) { byId[courseId].chapters.push(...list); },
+    chapters(courseId, list, opts) {
+      const arr = byId[courseId].chapters;
+      if (opts && opts.after) {
+        const i = arr.findIndex(c => c.id === opts.after);
+        if (i < 0) throw new Error('chapters: no chapter ' + opts.after + ' in ' + courseId);
+        arr.splice(i + 1, 0, ...list);
+      } else arr.push(...list);
+    },
 
     // ---- text ----
     p: text => ({ type: 'p', text }),

@@ -1,17 +1,17 @@
 # PatternPrep: interview prep kits
 
-A static study site with a home page and 8 kits (176 lessons):
+A static study site with a home page and 8 kits (215 lessons):
 
 | Kit | Lessons |
 | --- | --- |
 | How to Write a Good Resume | 7 |
-| Coding Interview Patterns | 105 (19 patterns, Python / JavaScript / Java solutions) |
-| System Design Interview | 16 |
-| Behavioral Interview | 14 |
-| Object-Oriented Design Interview | 9 (Java + Python) |
-| Machine Learning System Design Interview | 10 |
-| Mobile System Design Interview | 7 (Kotlin / Swift snippets) |
-| Generative AI System Design Interview | 8 |
+| Coding Interview Patterns | 118 (19 patterns, Python / JavaScript / Java solutions) |
+| System Design Interview | 30 |
+| Behavioral Interview | 16 |
+| Object-Oriented Design Interview | 12 (Java + Python) |
+| Machine Learning System Design Interview | 11 |
+| Mobile System Design Interview | 9 (Kotlin / Swift snippets) |
+| Generative AI System Design Interview | 12 |
 
 All content is original study material.
 
